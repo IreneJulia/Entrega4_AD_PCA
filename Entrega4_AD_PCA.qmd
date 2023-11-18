@@ -1,0 +1,24 @@
+---
+title: "Entrega4_AD_PCA"
+format: html
+authors: "Irene LiFeng Julià Pérez i Xisco Ribera Ramis"
+editor: visual
+---
+
+[Link del Repositorio](https://github.com/IreneJulia/Entrega4_AD_PCA)
+
+**Considera los datos europa.dat que están disponibles en Aula Digital. Los datos corresponden a los porcentajes de población empleados en diferentes actividades económicas en Europa para el año 1979. Las variables consideradas son: Agricultura, Minas, Fábricas, Suministro Eléctrico, Construcción, Industrias de Servicio, Finanzas, Servicios Sociales y Personales y, Transporte y Comunicaciones. Utiliza el método de componentes principales para reducir el número de variables, y tratar de determinar grupos de países con comportamientos semejantes en la distribución de su fuerza de trabajo. En este caso, usa la matriz de covarianza para el cálculo de las componentes principales, ya que todos los datos están medidos en la misma escala (porcentaje de la población) y por las caractersticas de los datos, no parece una buena idea considerarlos todos de igual manera.**
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+```
+
+Cargamos la tabla de datos:
+
+```{r}
+datos = read.table("europa.dat", header = TRUE)
+str(datos)
+head(datos)
+```
+
