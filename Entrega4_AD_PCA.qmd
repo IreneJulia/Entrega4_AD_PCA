@@ -21,4 +21,3 @@ datos = read.table("europa.dat", header = TRUE)
 str(datos)
 head(datos)
 ```
-
