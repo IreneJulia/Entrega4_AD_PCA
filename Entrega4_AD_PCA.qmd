@@ -13,6 +13,7 @@ editor: visual
 library(tidyverse)
 library(ggplot2)
 library(factoextra)
+library(ggfortify)
 ```
 
 Cargamos la tabla de datos:
@@ -86,10 +87,64 @@ Observemos que la primera componente principal da un peso muy elevado y positivo
 Respecto a la segunda componente principal representa sobretodo a `Fábrica` y a `Servicios Sociales y Personales`.
 
 ```{r}
-fviz_pca_biplot(datos.acp, repel = TRUE,
+fviz_pca_biplot(datos.acp,  repel = TRUE,
                 col.var = "#2E9FDF", # color para las variables
                 col.ind = "#696969"  # color para las observaciones
                 )
+```
+
+
+```{r}
+# Resultados por Variables
+res.var=get_pca_var(datos.acp)
+res.var$contrib        # Contribuciones a las CP 
+```
+
+```{r}
+res.var$cos2           # Calidad de la representación
+```
+
+```{r}
+# Resultados por observaciones
+res.obs=get_pca_ind(datos.acp)
+res.obs$coord  #Coordenadas
+```
+
+```{r}
+round(res.obs$contrib,7)  #Contribuciones a las CP
+```
+
+
+```{r}
+round(res.obs$cos2,6)  # Calidad de la representación
+```
+
+```{r}
+res.obs$cos2[1,1]
+datos$Agr
+datos[1,]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r, eval = FALSE}
+autoplot(datos.acp, data = datos, colour = 'Species',
+         loadings = TRUE, loadings.colour = 'blue',
+         loadings.label = TRUE, loadings.label.size = 3)
 ```
 
 
