@@ -104,7 +104,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><strong>Considera los datos europa.dat que están disponibles en Aula Digital. Los datos corresponden a los porcentajes de población empleados en diferentes actividades económicas en Europa para el año 1979. Las variables consideradas son: Agricultura, Minas, Fábricas, Suministro Eléctrico, Construcción, Industrias de Servicio, Finanzas, Servicios Sociales y Personales y, Transporte y Comunicaciones. Utiliza el método de componentes principales para reducir el número de variables, y tratar de determinar grupos de países con comportamientos semejantes en la distribución de su fuerza de trabajo. En este caso, usa la matriz de covarianza para el cálculo de las componentes principales, ya que todos los datos están medidos en la misma escala (porcentaje de la población) y por las caractersticas de los datos, no parece una buena idea considerarlos todos de igual manera.</strong></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(factoextra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Cargamos la tabla de datos:</p>
 <div class="cell">
@@ -133,7 +134,123 @@ Irlanda             23.2 1.0 20.7 1.3  7.5 16.8 2.8 20.8 6.1
 Italia              15.9 0.6 27.6 0.5 10.0 18.1 1.6 20.1 5.7</code></pre>
 </div>
 </div>
-<p>cjkdcnjkscnksadnc</p>
+<p>Consideramos el dataset en forma de matriz</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">=</span> <span class="fu">as.matrix</span>(datos)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Calculamos las componentes</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>datos.acp<span class="ot">=</span><span class="fu">prcomp</span>(datos, <span class="at">scale =</span> <span class="cn">FALSE</span>, <span class="at">center =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>datos.acp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Standard deviations (1, .., p=9):
+[1] 17.4200491  6.6107228  3.8996608  2.3747336  1.5631376  1.0227575  0.6487274
+[8]  0.2548071  0.0437262
+
+Rotation (n x k) = (9 x 9):
+             PC1          PC2          PC3         PC4          PC5         PC6
+Agr  0.891758406 -0.006826746  0.118466699  0.09676712  0.180043781 -0.15262561
+Min  0.001922618  0.092347069  0.079379068  0.01015633 -0.001121643  0.45636121
+Fab -0.271271411  0.770269221  0.184678991  0.01040077  0.335999746 -0.20093094
+Ene -0.008388285  0.012015922 -0.006768322 -0.01814178 -0.002459689  0.23086414
+Con -0.049594016  0.068988571 -0.077312766  0.08292614 -0.724262390 -0.55835746
+IS  -0.191798409 -0.234416513 -0.579612752  0.60760858  0.265863007 -0.02157242
+Fin -0.031128614 -0.130082403 -0.469969939 -0.78119316  0.121062046 -0.05528170
+SSP -0.298046310 -0.566777401  0.597745181 -0.04833726  0.235915950 -0.24786088
+TC  -0.045364280 -0.009888386  0.159415225  0.03783527 -0.434890328  0.54593853
+             PC7          PC8        PC9
+Agr -0.091621401  0.068678066 -0.3354111
+Min  0.766470364  0.290464275 -0.3239614
+Fab -0.161983468  0.074117735 -0.3374633
+Ene  0.062936752 -0.909183254 -0.3398982
+Con  0.194294560 -0.004457936 -0.3253270
+IS  -0.087935421  0.104435658 -0.3366529
+Fin -0.079976564  0.122754675 -0.3343621
+SSP -0.004543731  0.052137300 -0.3323638
+TC  -0.567476088  0.223813567 -0.3342147</code></pre>
+</div>
+</div>
+<p>Los valores propios muestran el porcentaje de varianza explicada por cada componente principal.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>lambdas <span class="ot">=</span> <span class="fu">get_eigenvalue</span>(datos.acp)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>lambdas</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        eigenvalue variance.percent cumulative.variance.percent
+Dim.1 3.034581e+02     81.578357771                    81.57836
+Dim.2 4.370166e+01     11.748274792                    93.32663
+Dim.3 1.520735e+01      4.088178743                    97.41481
+Dim.4 5.639360e+00      1.516023794                    98.93084
+Dim.5 2.443399e+00      0.656856714                    99.58769
+Dim.6 1.046033e+00      0.281204052                    99.86890
+Dim.7 4.208472e-01      0.113135967                    99.98203
+Dim.8 6.492666e-02      0.017454172                    99.99949
+Dim.9 1.911981e-03      0.000513996                   100.00000</code></pre>
+</div>
+</div>
+<p>Notemos que usando las 2 primeras componentes principales explican entre el 93.3% de los datos. Veamos el gráfico del codo:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_eig</span>(datos.acp, <span class="at">addlabels =</span> <span class="cn">TRUE</span>, <span class="at">ylim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">100</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Entrega4_AD_PCA_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Efectivamente, nos quedamos con 2 componentes principales.</p>
+<p>Realicemos un gráfico de círculo de correlación variable para ver como se agrupan las variables y la calidad de representación de las varaibles</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_pca_var</span>(datos.acp, <span class="at">axes =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), <span class="at">col.var =</span> <span class="st">"contrib"</span>,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">gradient.cols =</span> <span class="fu">c</span>(<span class="st">"#00AFBB"</span>, <span class="st">"#E7B800"</span>, <span class="st">"#FC4E07"</span>),</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">repel =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Entrega4_AD_PCA_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Observemos que la variable <code>Agricultura</code> queda muy bien representada por la primera componente principal. De la misma manera, observamos que las variables <code>Fábricas</code> y <code>Servicios Sociales y Personales</code> tambien estan bastante representadas. De las demás variables estan poco representadas.</p>
+<p>Realicemos un gráfico de cos2 para corroborarlo</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>var <span class="ot">&lt;-</span> <span class="fu">get_pca_var</span>(datos.acp)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cos2</span>(datos.acp, <span class="at">choice =</span> <span class="st">"var"</span>, <span class="at">axes =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Entrega4_AD_PCA_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Efectivamente, las pres primeras variables tienen un cos2 alto, por tanto estas bien representadas. En cambio para las demás variables tiene un cos2 prácticamente nulo, indica que estas variables no estan bien representadas por las CPs.</p>
+<p>Para ver como se relacionan las componentes principales con los datos originales, veamos los autovectores.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>datos.acp<span class="sc">$</span>rotation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>             PC1          PC2          PC3         PC4          PC5         PC6
+Agr  0.891758406 -0.006826746  0.118466699  0.09676712  0.180043781 -0.15262561
+Min  0.001922618  0.092347069  0.079379068  0.01015633 -0.001121643  0.45636121
+Fab -0.271271411  0.770269221  0.184678991  0.01040077  0.335999746 -0.20093094
+Ene -0.008388285  0.012015922 -0.006768322 -0.01814178 -0.002459689  0.23086414
+Con -0.049594016  0.068988571 -0.077312766  0.08292614 -0.724262390 -0.55835746
+IS  -0.191798409 -0.234416513 -0.579612752  0.60760858  0.265863007 -0.02157242
+Fin -0.031128614 -0.130082403 -0.469969939 -0.78119316  0.121062046 -0.05528170
+SSP -0.298046310 -0.566777401  0.597745181 -0.04833726  0.235915950 -0.24786088
+TC  -0.045364280 -0.009888386  0.159415225  0.03783527 -0.434890328  0.54593853
+             PC7          PC8        PC9
+Agr -0.091621401  0.068678066 -0.3354111
+Min  0.766470364  0.290464275 -0.3239614
+Fab -0.161983468  0.074117735 -0.3374633
+Ene  0.062936752 -0.909183254 -0.3398982
+Con  0.194294560 -0.004457936 -0.3253270
+IS  -0.087935421  0.104435658 -0.3366529
+Fin -0.079976564  0.122754675 -0.3343621
+SSP -0.004543731  0.052137300 -0.3323638
+TC  -0.567476088  0.223813567 -0.3342147</code></pre>
+</div>
+</div>
+<p>Observemos que la primera componente principal da un peso muy elevado y positivo a la variable <code>Agrucultura</code>, y de signo contrario a las demás (excepto <code>Mineria</code> con un peso muy bajo).</p>
+<p>Respecto a la segunda componente principal representa sobretodo a <code>Fábrica</code> y a <code>Servicios Sociales y Personales</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_pca_biplot</span>(datos.acp, <span class="at">repel =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">col.var =</span> <span class="st">"#2E9FDF"</span>, <span class="co"># color para las variables</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">col.ind =</span> <span class="st">"#696969"</span>  <span class="co"># color para las observaciones</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Entrega4_AD_PCA_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 
 </main>
 <!-- /main column -->

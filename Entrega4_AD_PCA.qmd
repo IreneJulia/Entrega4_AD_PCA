@@ -12,6 +12,7 @@ editor: visual
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(ggplot2)
+library(factoextra)
 ```
 
 Cargamos la tabla de datos:
@@ -24,4 +25,71 @@ head(datos)
 
 
 
-cjkdcnjkscnksadnc
+Consideramos el dataset en forma de matriz
+
+```{r}
+X = as.matrix(datos)
+```
+
+
+
+Calculamos las componentes
+
+```{r}
+datos.acp=prcomp(datos, scale = FALSE, center = TRUE)
+datos.acp
+```
+Los valores propios muestran el porcentaje de varianza explicada por cada componente principal.
+
+
+```{r}
+lambdas = get_eigenvalue(datos.acp)
+lambdas
+```
+
+Notemos que usando las 2 primeras componentes principales explican entre el 93.3% de los datos. Veamos el gráfico del codo:
+
+```{r}
+fviz_eig(datos.acp, addlabels = TRUE, ylim=c(0,100))
+```
+
+Efectivamente, nos quedamos con 2 componentes principales.
+
+
+Realicemos un gráfico de círculo de correlación variable para ver como se agrupan las variables y la calidad de representación de las varaibles 
+
+```{r}
+fviz_pca_var(datos.acp, axes = c(1,2), col.var = "contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE)
+```
+
+Observemos que la variable `Agricultura` queda muy bien representada por la primera componente principal. De la misma manera, observamos que las variables `Fábricas` y `Servicios Sociales y Personales` tambien estan bastante representadas. De las demás variables estan poco representadas.
+
+Realicemos un gráfico de cos2 para corroborarlo
+
+```{r}
+var <- get_pca_var(datos.acp)
+fviz_cos2(datos.acp, choice = "var", axes = 1:2)
+```
+
+Efectivamente, las pres primeras variables tienen un cos2 alto, por tanto estas bien representadas. En cambio para las demás variables tiene un cos2 prácticamente nulo, indica que estas variables no estan bien representadas por las CPs.
+
+Para ver como se relacionan las componentes principales con los datos originales, veamos los autovectores.
+
+```{r}
+datos.acp$rotation
+```
+
+Observemos que la primera componente principal da un peso muy elevado y positivo a la variable `Agrucultura`, y de signo contrario a las demás (excepto `Mineria`  con un peso muy bajo).
+
+Respecto a la segunda componente principal representa sobretodo a `Fábrica` y a `Servicios Sociales y Personales`.
+
+```{r}
+fviz_pca_biplot(datos.acp, repel = TRUE,
+                col.var = "#2E9FDF", # color para las variables
+                col.ind = "#696969"  # color para las observaciones
+                )
+```
+
+
