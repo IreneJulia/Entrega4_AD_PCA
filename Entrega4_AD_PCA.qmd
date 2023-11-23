@@ -9,6 +9,10 @@ editor: visual
 
 **Considera los datos europa.dat que están disponibles en Aula Digital. Los datos corresponden a los porcentajes de población empleados en diferentes actividades económicas en Europa para el año 1979. Las variables consideradas son: Agricultura, Minas, Fábricas, Suministro Eléctrico, Construcción, Industrias de Servicio, Finanzas, Servicios Sociales y Personales y, Transporte y Comunicaciones. Utiliza el método de componentes principales para reducir el número de variables, y tratar de determinar grupos de países con comportamientos semejantes en la distribución de su fuerza de trabajo. En este caso, usa la matriz de covarianza para el cálculo de las componentes principales, ya que todos los datos están medidos en la misma escala (porcentaje de la población) y por las caractersticas de los datos, no parece una buena idea considerarlos todos de igual manera.**
 
+## Datos
+
+Empezamos cargando todas las librerías que utilizaremos.
+
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(ggplot2)
@@ -16,77 +20,71 @@ library(factoextra)
 library(ggfortify)
 ```
 
-Cargamos la tabla de datos:
+Cargamos la tabla de datos y representemos un resumen de dicha tabla.
 
 ```{r}
 datos = read.table("europa.dat", header = TRUE)
-str(datos)
-head(datos)
+glimpse(datos)
 ```
 
 
-
-Consideramos el dataset en forma de matriz
-
-```{r}
-X = as.matrix(datos)
-```
+## Análisis de Componentes Principales
 
 
-
-Calculamos las componentes
+Calculamos las componentes principales con el comando `prcomp` utilizando nuestro dataset, sin escalar los datos ya que están todos en la misma escala. Por último, los consideramos centrados en el 0.
 
 ```{r}
 datos.acp=prcomp(datos, scale = FALSE, center = TRUE)
-datos.acp
 ```
+
 Los valores propios muestran el porcentaje de varianza explicada por cada componente principal.
 
-
-```{r}
+```{r, echo=FALSE}
 lambdas = get_eigenvalue(datos.acp)
-lambdas
+round(lambdas, 5)
 ```
 
-Notemos que usando las 2 primeras componentes principales explican entre el 93.3% de los datos. Veamos el gráfico del codo:
+Notemos que usando las 2 primeras componentes principales explican aproximadamente el 93.3% de los datos. Veamos el gráfico del codo:
 
-```{r}
+```{r, echo=FALSE}
 fviz_eig(datos.acp, addlabels = TRUE, ylim=c(0,100))
 ```
 
-Efectivamente, nos quedamos con 2 componentes principales.
+Efectivamente, viendo el gráfico y utilizando el criterio del codo, nos quedaremos con las dos primeras componentes principales.
 
 
-Realicemos un gráfico de círculo de correlación variable para ver como se agrupan las variables y la calidad de representación de las varaibles 
+Realicemos un gráfico de círculo de correlación variable para ver como se agrupan las variables y la calidad de representación que tienen.
 
-```{r}
+```{r, echo=FALSE}
 fviz_pca_var(datos.acp, axes = c(1,2), col.var = "contrib",
              gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
              repel = TRUE)
 ```
 
-Observemos que la variable `Agricultura` queda muy bien representada por la primera componente principal. De la misma manera, observamos que las variables `Fábricas` y `Servicios Sociales y Personales` tambien estan bastante representadas. De las demás variables estan poco representadas.
+Observemos que la variable `Agricultura` queda muy bien representada por la primera componente principal. De la misma manera, observamos que las variables `Fábricas` y `Servicios Sociales y Personales` también estan bastante representadas. El resto de variables están poco representadas, como se puede ver en la poca longitud de las flechas.
 
-Realicemos un gráfico de cos2 para corroborarlo
+Para corroborar numéricamente la calidad de representación, realizaremos un gráfico de cos2.
 
-```{r}
+```{r, echo=FALSE}
 var <- get_pca_var(datos.acp)
 fviz_cos2(datos.acp, choice = "var", axes = 1:2)
 ```
 
-Efectivamente, las pres primeras variables tienen un cos2 alto, por tanto estas bien representadas. En cambio para las demás variables tiene un cos2 prácticamente nulo, indica que estas variables no estan bien representadas por las CPs.
+Efectivamente, las tres primeras variables tienen un cos2 alto, por tanto estas bien representadas. En cambio, las otras variables tienen un valor de cos2 prácticamente nulo, indica que estas variables no estan bien representadas por las componentes principales.
 
 Para ver como se relacionan las componentes principales con los datos originales, veamos los autovectores.
 
 ```{r}
-datos.acp$rotation
+round(datos.acp$rotation,4)
 ```
 
 Observemos que la primera componente principal da un peso muy elevado y positivo a la variable `Agrucultura`, y de signo contrario a las demás (excepto `Mineria`  con un peso muy bajo).
 
-Respecto a la segunda componente principal representa sobretodo a `Fábrica` y a `Servicios Sociales y Personales`.
+Respecto a la segunda componente principal, representa sobretodo a `Fábrica` y a `Servicios Sociales y Personales` (con signos opuestos pero un peso elevado).
 
-```{r}
+Ahora, vamos a realizar un `biplot`, que nos permitirá visualizar las variables originales y las observaciones transformadas en los ejes de componentes principales.
+
+```{r, echo=FALSE}
 fviz_pca_biplot(datos.acp,  repel = TRUE,
                 col.var = "#2E9FDF", # color para las variables
                 col.ind = "#696969"  # color para las observaciones
@@ -94,30 +92,63 @@ fviz_pca_biplot(datos.acp,  repel = TRUE,
 ```
 
 
-```{r}
-# Resultados por Variables
+De nuevo, se aprecia como la variable `Agricultura` es la mejor representada debido a la longitud de la flecha. Le siguen las variables de `Fábricas` y `Servicios Sociales y Personales`, mejor representadas por la segunda componente.
+
+
+### Resultados del Análisis
+
+Llegado a este punto, vamos a comprobar numéricamente todas las conclusiones que hemos sacado anteriormente. Reslmente basta restringirnos a las dos primeras componentes principales ya que en el estudio hemos decidido utilizar solamente estas dos.
+
+#### Resultados por Variables
+
+Empezamos por las contribuciones de las variables a las componentes principales.
+
+```{r, echo=FALSE}
 res.var=get_pca_var(datos.acp)
-res.var$contrib        # Contribuciones a las CP 
+round(res.var$contrib , 4)      # Contribuciones a las CP 
 ```
 
-```{r}
-res.var$cos2           # Calidad de la representación
+Tambien apreciamos la calidad de representación de las variables a las componentes principales.
+
+```{r, echo=FALSE}
+round(res.var$cos2, 5)
 ```
 
-```{r}
-# Resultados por observaciones
+Respecto a las variables, hemos podido comprobar lo expuesto anteriormente, se aprecia una fuerte contribución de la variable `Agricultura` a la primera componente principal, además de una muy buena representación (un valor de cos2 muy elevado).
+
+Seguidamente, la variable `Fábricas` tiene gran contribución a la segunda componente principal, con menor representación debido al valor de cos2 y que también contribuye a la primera componente principal, pero muy poco. En cambio, la variable `Servicios sociales y Personales` tiene más poca contribución a la segunda componente, pero está algo mejor representada por la primera que la variable anterior; de todos modos, la calidad de representación es más baja que las anteriores.
+
+No podemos destacar más variables ya que, como vimos en los gráficos, no habia prácticamente representación por parte de las componentes principales.
+
+
+
+#### Resultados por Observaciones
+
+Ahora, respecto a las observaciones, empezamos por las coordenadas.
+
+```{r, echo=FALSE}
 res.obs=get_pca_ind(datos.acp)
-res.obs$coord  #Coordenadas
+round(res.obs$coord, 2)  #Coordenadas
 ```
 
-```{r}
-round(res.obs$contrib,7)  #Contribuciones a las CP
+También las contribuciones de cada observación a las componentes principales.
+
+```{r, echo=FALSE}
+round(res.obs$contrib,2)  #Contribuciones a las CP
 ```
 
+Por último, la calidad de representación, es decir, el valor de cos2.
 
-```{r}
-round(res.obs$cos2,6)  # Calidad de la representación
+```{r, echo=FALSE}
+round(res.obs$cos2,3)  # Calidad de la representación
 ```
+
+### Grupos
+
+Vamos a tratar de determinar grupos de países con comportamientos semejantes en la distribución de su fuerza de trabajo.
+
+
+
 
 ```{r}
 res.obs$cos2[1,1]
@@ -129,22 +160,15 @@ datos[1,]
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 ```{r, eval = FALSE}
 autoplot(datos.acp, data = datos, colour = 'Species',
          loadings = TRUE, loadings.colour = 'blue',
          loadings.label = TRUE, loadings.label.size = 3)
 ```
+
+
+
+
+### Conclusión
 
 
