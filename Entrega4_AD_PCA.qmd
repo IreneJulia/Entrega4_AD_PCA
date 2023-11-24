@@ -107,7 +107,6 @@ Empezamos por las contribuciones de las variables a las componentes principales.
 ```{r, echo=FALSE}
 res.var=get_pca_var(datos.acp)
 round(res.var$contrib, 4)      # Contribuciones a las CP
-round(t(res.var$contrib[,c(1:2)]), 4)
 ```
 
 Tambien apreciamos la calidad de representación de las variables a las componentes principales.
