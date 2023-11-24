@@ -109,7 +109,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(factoextra)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggfortify)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggfortify)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Cargamos la tabla de datos y representemos un resumen de dicha tabla.</p>
 <div class="cell">
@@ -174,7 +175,6 @@ Dim.9    0.00191          0.00051                   100.00000</code></pre>
 <p>Efectivamente, las tres primeras variables tienen un cos2 alto, por tanto estas bien representadas. En cambio, las otras variables tienen un valor de cos2 prácticamente nulo, indica que estas variables no estan bien representadas por las componentes principales.</p>
 <p>Para ver como se relacionan las componentes principales con los datos originales, veamos los autovectores.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(datos.acp<span class="sc">$</span>rotation,<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>        PC1     PC2     PC3     PC4     PC5     PC6     PC7     PC8    PC9
 Agr  0.8918 -0.0068  0.1185  0.0968  0.1800 -0.1526 -0.0916 -0.0687 0.3354
@@ -199,7 +199,7 @@ TC  -0.0454 -0.0099  0.1594  0.0378 -0.4349  0.5459 -0.5675 -0.2238 0.3342</code
 <p>De nuevo, se aprecia como la variable <code>Agricultura</code> es la mejor representada debido a la longitud de la flecha. Le siguen las variables de <code>Fábricas</code> y <code>Servicios Sociales y Personales</code>, mejor representadas por la segunda componente.</p>
 <section id="resultados-del-análisis" class="level3">
 <h3 class="anchored" data-anchor-id="resultados-del-análisis">Resultados del Análisis</h3>
-<p>Llegado a este punto, vamos a comprobar numéricamente todas las conclusiones que hemos sacado anteriormente. Reslmente basta restringirnos a las dos primeras componentes principales ya que en el estudio hemos decidido utilizar solamente estas dos.</p>
+<p>Llegado a este punto, vamos a comprobar numéricamente todas las conclusiones que hemos sacado anteriormente. Realmente basta restringirnos a las dos primeras componentes principales ya que en el estudio hemos decidido utilizar solamente estas dos.</p>
 <section id="resultados-por-variables" class="level4">
 <h4 class="anchored" data-anchor-id="resultados-por-variables">Resultados por Variables</h4>
 <p>Empezamos por las contribuciones de las variables a las componentes principales.</p>
@@ -215,6 +215,11 @@ IS   3.6787  5.4951 33.5951 36.9188  7.0683  0.0465  0.7733  1.0907 11.3335
 Fin  0.0969  1.6921 22.0872 61.0263  1.4656  0.3056  0.6396  1.5069 11.1798
 SSP  8.8832 32.1237 35.7299  0.2336  5.5656  6.1435  0.0021  0.2718 11.0466
 TC   0.2058  0.0098  2.5413  0.1432 18.9130 29.8049 32.2029  5.0093 11.1699</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Agr    Min     Fab    Ene    Con     IS    Fin     SSP     TC
+Dim.1 79.5233 0.0004  7.3588 0.0070 0.2460 3.6787 0.0969  8.8832 0.2058
+Dim.2  0.0047 0.8528 59.3315 0.0144 0.4759 5.4951 1.6921 32.1237 0.0098</code></pre>
 </div>
 </div>
 <p>Tambien apreciamos la calidad de representación de las variables a las componentes principales.</p>
@@ -339,26 +344,60 @@ Yugoslavia          0.927 0.000 0.037 0.033 0.001 0.002 0.000 0.000     0</code>
 <section id="grupos" class="level3">
 <h3 class="anchored" data-anchor-id="grupos">Grupos</h3>
 <p>Vamos a tratar de determinar grupos de países con comportamientos semejantes en la distribución de su fuerza de trabajo.</p>
+<p>El criterio que seguiremos es separar las observaciones dependiendo de su contribucón a las componentes principales. Como la variable <code>Agricultura</code> es la que tiene una mayor representación, uno de los grupos estará formado por los paises cuya mayor fuerza de trabajo se basa en la agricultura. Para determinar este grupo, consideraremos los paises que tienen coordenada positiva en el eje de la primera componente principal.</p>
+<p>Las otras dos variables mejor representadas son <code>Fábricas</code> y <code>Servicios Sociales y Personales</code>. La relación de estas variables con la primera componente principal es negativa, así que consideramos el resto de paises para clasificar en estos dos grupos. Esta clasificación se va a determinar mediante la segunda componente principal: la relación de <code>Fábricas</code> con la componente principal es positiva, mientras que con la otra variable es negativa. Por tanto, utilizaremos estas condiciones para dividir los paises.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>res.obs<span class="sc">$</span>cos2[<span class="dv">1</span>,<span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.9095647</code></pre>
+<pre><code>                         Dim.1        Dim.2  Grupos
+Belgica             -17.516687  -4.92622849 Grupo 3
+Dinamarca           -11.496688 -11.66176637 Grupo 3
+Francia              -9.128686  -2.16828207 Grupo 3
+Alemania Occidental -14.393424   5.04749385 Grupo 2
+Irlanda               4.458174  -6.13156498 Grupo 1
+Italia               -4.026684  -0.38889529 Grupo 3
+Luxemburgo          -12.089752   2.33236877 Grupo 2
+Holanda             -13.900455  -9.72359023 Grupo 3
+Inglaterra          -18.728675  -3.33178946 Grupo 3
+Austria              -6.471418   3.35662962 Grupo 2
+Finlandia            -6.837047  -3.97634061 Grupo 3
+Grecia               25.427083  -1.80467718 Grupo 1
+Noruega             -10.972019  -8.85877780 Grupo 3
+Portugal              9.403865  -0.08570061 Grupo 1
+Espana                5.774973   6.15867547 Grupo 1
+Suecia              -15.311975  -8.52674423 Grupo 3
+Suiza               -12.683839   9.77920054 Grupo 2
+Turquia              52.115644  -8.64165980 Grupo 1
+Bulgaria              4.156791   6.70685051 Grupo 1
+Checoslovaquia       -3.246127   9.23467980 Grupo 2
+Alemania Oriental   -17.415527  10.73233092 Grupo 2
+Hungria               3.135737   4.98695108 Grupo 1
+Polonia              13.315709   2.94482700 Grupo 1
+Rumania              17.011336   9.12523022 Grupo 1
+Union Sovietica       4.587043  -0.87197041 Grupo 1
+Yugoslavia           34.832648   0.69274975 Grupo 1</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>datos<span class="sc">$</span>Agr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1]  3.3  9.2 10.8  6.7 23.2 15.9  7.7  6.3  2.7 12.7 13.0 41.4  9.0 27.8 22.9
-[16]  6.1  7.7 66.8 23.6 16.5  4.2 21.7 31.1 34.7 23.7 48.7</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>datos[<span class="dv">1</span>,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Añadimos este factor a nuestra tabla de datos original y realizamos un gráfico para visualizar la división de los grupos.</p>
+<div class="cell">
 <div class="cell-output cell-output-stdout">
-<pre><code>        Agr Min  Fab Ene Con   IS Fin  SSP  TC
-Belgica 3.3 0.9 27.6 0.9 8.2 19.1 6.2 26.6 7.2</code></pre>
+<pre><code>Rows: 26
+Columns: 10
+$ Agr   &lt;dbl&gt; 3.3, 9.2, 10.8, 6.7, 23.2, 15.9, 7.7, 6.3, 2.7, 12.7, 13.0, 41.4…
+$ Min   &lt;dbl&gt; 0.9, 0.1, 0.8, 1.3, 1.0, 0.6, 3.1, 0.1, 1.4, 1.1, 0.4, 0.6, 0.5,…
+$ Fab   &lt;dbl&gt; 27.6, 21.8, 27.5, 35.8, 20.7, 27.6, 30.8, 22.5, 30.2, 30.2, 25.9…
+$ Ene   &lt;dbl&gt; 0.9, 0.6, 0.9, 0.9, 1.3, 0.5, 0.8, 1.0, 1.4, 1.4, 1.3, 0.6, 0.8,…
+$ Con   &lt;dbl&gt; 8.2, 8.3, 8.9, 7.3, 7.5, 10.0, 9.2, 9.9, 6.9, 9.0, 7.4, 8.1, 8.6…
+$ IS    &lt;dbl&gt; 19.1, 14.6, 16.8, 14.4, 16.8, 18.1, 18.5, 18.0, 16.9, 16.8, 14.7…
+$ Fin   &lt;dbl&gt; 6.2, 6.5, 6.0, 5.0, 2.8, 1.6, 4.6, 6.8, 5.7, 4.9, 5.5, 2.4, 4.7,…
+$ SSP   &lt;dbl&gt; 26.6, 32.2, 22.6, 22.3, 20.8, 20.1, 19.2, 28.5, 28.3, 16.8, 24.3…
+$ TC    &lt;dbl&gt; 7.2, 7.1, 5.7, 6.1, 6.1, 5.7, 6.2, 6.8, 6.4, 7.0, 7.6, 6.7, 9.4,…
+$ Grupo &lt;fct&gt; Grupo 3, Grupo 3, Grupo 3, Grupo 2, Grupo 1, Grupo 3, Grupo 2, G…</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(datos.acp, <span class="at">data =</span> datos, <span class="at">colour =</span> <span class="st">'Species'</span>,</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">loadings =</span> <span class="cn">TRUE</span>, <span class="at">loadings.colour =</span> <span class="st">'blue'</span>,</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">loadings.label =</span> <span class="cn">TRUE</span>, <span class="at">loadings.label.size =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Entrega4_AD_PCA_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 </section>
 <section id="conclusión" class="level3">

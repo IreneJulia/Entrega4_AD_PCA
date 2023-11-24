@@ -18,6 +18,7 @@ library(tidyverse)
 library(ggplot2)
 library(factoextra)
 library(ggfortify)
+library(ggrepel)
 ```
 
 Cargamos la tabla de datos y representemos un resumen de dicha tabla.
@@ -74,7 +75,7 @@ Efectivamente, las tres primeras variables tienen un cos2 alto, por tanto estas 
 
 Para ver como se relacionan las componentes principales con los datos originales, veamos los autovectores.
 
-```{r}
+```{r, echo=FALSE}
 round(datos.acp$rotation,4)
 ```
 
@@ -97,7 +98,7 @@ De nuevo, se aprecia como la variable `Agricultura` es la mejor representada deb
 
 ### Resultados del Análisis
 
-Llegado a este punto, vamos a comprobar numéricamente todas las conclusiones que hemos sacado anteriormente. Reslmente basta restringirnos a las dos primeras componentes principales ya que en el estudio hemos decidido utilizar solamente estas dos.
+Llegado a este punto, vamos a comprobar numéricamente todas las conclusiones que hemos sacado anteriormente. Realmente basta restringirnos a las dos primeras componentes principales ya que en el estudio hemos decidido utilizar solamente estas dos.
 
 #### Resultados por Variables
 
@@ -105,7 +106,8 @@ Empezamos por las contribuciones de las variables a las componentes principales.
 
 ```{r, echo=FALSE}
 res.var=get_pca_var(datos.acp)
-round(res.var$contrib , 4)      # Contribuciones a las CP 
+round(res.var$contrib, 4)      # Contribuciones a las CP
+round(t(res.var$contrib[,c(1:2)]), 4)
 ```
 
 Tambien apreciamos la calidad de representación de las variables a las componentes principales.
@@ -147,23 +149,35 @@ round(res.obs$cos2,3)  # Calidad de la representación
 
 Vamos a tratar de determinar grupos de países con comportamientos semejantes en la distribución de su fuerza de trabajo.
 
+El criterio que seguiremos es separar las observaciones dependiendo de su contribucón a las componentes principales. Como la variable `Agricultura` es la que tiene una mayor representación, uno de los grupos estará formado por los paises cuya mayor fuerza de trabajo se basa en la agricultura. Para determinar este grupo, consideraremos los paises que tienen coordenada positiva en el eje de la primera componente principal.
+
+Las otras dos variables mejor representadas son `Fábricas` y `Servicios Sociales y Personales`. La relación de estas variables con la primera componente principal es negativa, así que consideramos el resto de paises para clasificar en estos dos grupos. Esta clasificación se va a determinar mediante la segunda componente principal: la relación de `Fábricas` con la componente principal es positiva, mientras que con la otra variable es negativa. Por tanto, utilizaremos estas condiciones para dividir los paises.
 
 
 
-```{r}
-res.obs$cos2[1,1]
-datos$Agr
-datos[1,]
+```{r, echo=FALSE}
+coord = data.frame(res.obs$coord[, c(1,2)])
+coord = coord %>% 
+  mutate(Grupos = if_else(Dim.1 > 0, "Grupo 1", if_else(Dim.2 > 0, "Grupo 2", "Grupo 3")))
+coord
+```
+
+Añadimos este factor a nuestra tabla de datos original y realizamos un gráfico para visualizar la división de los grupos.
+
+```{r, echo=FALSE}
+datos = datos %>% 
+  mutate(Grupo = as.factor(coord$Grupos))
+glimpse(datos)
 ```
 
 
 
-
-
-```{r, eval = FALSE}
-autoplot(datos.acp, data = datos, colour = 'Species',
+```{r, echo=FALSE}
+autoplot(datos.acp, data = datos, colour = 'Grupo',
          loadings = TRUE, loadings.colour = 'blue',
-         loadings.label = TRUE, loadings.label.size = 3)
+         loadings.label = FALSE, loadings.label.size = 3, size = 3) +
+  geom_text_repel(aes(label = rownames(datos)), box.padding = 0.5, segment.color = "darkgrey", size = 3, color = "darkgrey") +
+  theme_bw()
 ```
 
 
