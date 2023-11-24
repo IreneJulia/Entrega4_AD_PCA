@@ -181,8 +181,28 @@ autoplot(datos.acp, data = datos, colour = 'Grupo',
 ```
 
 
+Veamos en un mapa de Europa con los paises pintados en función del grupo al cual le hemos asignado:
+
+![](Europa Map Chart.png)
+
+Nota: Como los datos se tomaron en 1979, el mapa de Europa ha cambiado respecto al actual. Algunos paises se han fragmentado y otros se han unido. En concreto:
+
+- Debido a la separación de Alemania por muro de Berlín después de la Seguna Guerra Mundial se diferenció entre Alemania Oriental y Alemania Occidental (hasta 1989, que se volvió a unir en un solo estado). Por tanto, en el mapa solo hemos considerado Alemania.
+
+- Hay una muestra llamada "Checoslovaquia", que actualmente este estado esta separado en Republica Checa y Eslovaquia (separación en 1992).
+
+- Del mismo modo aparece la Unión Sovietica, cuyos paises que la conformaban son: Rusia, Transcaucásicas (Armenia, Azerbayán y Georgia), Ucrania y Bielorrusia (disolución en 1991).
+
+- Por último tenemos Yugoslavia: Bosnia y Herzegovina, Croacia, Eslovenia, Macedonia, Montenegro y Serbia (disolución en 1992).
+
+A la hora de pintar el mapa, todos los paises actuales que formaban parte de algun estado mencionado anteriormente se han coloreado del mismo color que el estado al que pertenecían. Por tanto, las conclusiones que se extraen no son actuales ya que cada país ahora es independiente.
 
 
 ### Conclusión
 
+- Usando el método de componentes principales hemos podido reducir el número de variables a 2, ya que explican aproximadamente el 93.3% de los datos.
+
+- Las variables iniciales que mejor se han podido describir con las dos componentes principales han sido `Agricultura`, `Fábrica` y `Servicios Sociales y Personales`.
+
+- Hemos podido establecer 3 grupos de paises con comportamientos semejantes en función de si su fuerza de trabajo se distribuía más en `Agricultura` (Grupo 1), `Fábrica` (Grupo 2) y `Servicios Sociales y Personales` (Grupo 3).
 
