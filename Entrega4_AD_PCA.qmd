@@ -28,9 +28,7 @@ datos = read.table("europa.dat", header = TRUE)
 glimpse(datos)
 ```
 
-
 ## Análisis de Componentes Principales
-
 
 Calculamos las componentes principales con el comando `prcomp` utilizando nuestro dataset, sin escalar los datos ya que están todos en la misma escala. Por último, los consideramos centrados en el 0.
 
@@ -52,7 +50,6 @@ fviz_eig(datos.acp, addlabels = TRUE, ylim=c(0,100))
 ```
 
 Efectivamente, viendo el gráfico y utilizando el criterio del codo, nos quedaremos con las dos primeras componentes principales.
-
 
 Realicemos un gráfico de círculo de correlación variable para ver como se agrupan las variables y la calidad de representación que tienen.
 
@@ -79,7 +76,7 @@ Para ver como se relacionan las componentes principales con los datos originales
 round(datos.acp$rotation,4)
 ```
 
-Observemos que la primera componente principal da un peso muy elevado y positivo a la variable `Agrucultura`, y de signo contrario a las demás (excepto `Mineria`  con un peso muy bajo).
+Observemos que la primera componente principal da un peso muy elevado y positivo a la variable `Agrucultura`, y de signo contrario a las demás (excepto `Mineria` con un peso muy bajo).
 
 Respecto a la segunda componente principal, representa sobretodo a `Fábrica` y a `Servicios Sociales y Personales` (con signos opuestos pero un peso elevado).
 
@@ -92,9 +89,7 @@ fviz_pca_biplot(datos.acp,  repel = TRUE,
                 )
 ```
 
-
 De nuevo, se aprecia como la variable `Agricultura` es la mejor representada debido a la longitud de la flecha. Le siguen las variables de `Fábricas` y `Servicios Sociales y Personales`, mejor representadas por la segunda componente.
-
 
 ### Resultados del Análisis
 
@@ -120,8 +115,6 @@ Respecto a las variables, hemos podido comprobar lo expuesto anteriormente, se a
 Seguidamente, la variable `Fábricas` tiene gran contribución a la segunda componente principal, con menor representación debido al valor de cos2 y que también contribuye a la primera componente principal, pero muy poco. En cambio, la variable `Servicios sociales y Personales` tiene más poca contribución a la segunda componente, pero está algo mejor representada por la primera que la variable anterior; de todos modos, la calidad de representación es más baja que las anteriores.
 
 No podemos destacar más variables ya que, como vimos en los gráficos, no habia prácticamente representación por parte de las componentes principales.
-
-
 
 #### Resultados por Observaciones
 
@@ -152,8 +145,6 @@ El criterio que seguiremos es separar las observaciones dependiendo de su contri
 
 Las otras dos variables mejor representadas son `Fábricas` y `Servicios Sociales y Personales`. La relación de estas variables con la primera componente principal es negativa, así que consideramos el resto de paises para clasificar en estos dos grupos. Esta clasificación se va a determinar mediante la segunda componente principal: la relación de `Fábricas` con la componente principal es positiva, mientras que con la otra variable es negativa. Por tanto, utilizaremos estas condiciones para dividir los paises.
 
-
-
 ```{r, echo=FALSE}
 coord = data.frame(res.obs$coord[, c(1,2)])
 coord = coord %>% 
@@ -169,8 +160,6 @@ datos = datos %>%
 glimpse(datos)
 ```
 
-
-
 ```{r, echo=FALSE}
 autoplot(datos.acp, data = datos, colour = 'Grupo',
          loadings = TRUE, loadings.colour = 'blue',
@@ -179,29 +168,26 @@ autoplot(datos.acp, data = datos, colour = 'Grupo',
   theme_bw()
 ```
 
-
 Veamos en un mapa de Europa con los paises pintados en función del grupo al cual le hemos asignado:
 
-![](Europa Map Chart.png)
+![](Europa%20Map%20Chart.png)
 
 Nota: Como los datos se tomaron en 1979, el mapa de Europa ha cambiado respecto al actual. Algunos paises se han fragmentado y otros se han unido. En concreto:
 
-- Debido a la separación de Alemania por muro de Berlín después de la Seguna Guerra Mundial se diferenció entre Alemania Oriental y Alemania Occidental (hasta 1989, que se volvió a unir en un solo estado). Por tanto, en el mapa solo hemos considerado Alemania.
+-   Debido a la separación de Alemania por muro de Berlín después de la Seguna Guerra Mundial se diferenció entre Alemania Oriental y Alemania Occidental (hasta 1989, que se volvió a unir en un solo estado). Por tanto, en el mapa solo hemos considerado Alemania.
 
-- Hay una muestra llamada "Checoslovaquia", que actualmente este estado esta separado en Republica Checa y Eslovaquia (separación en 1992).
+-   Hay una muestra llamada "Checoslovaquia", que actualmente este estado esta separado en Republica Checa y Eslovaquia (separación en 1992).
 
-- Del mismo modo aparece la Unión Sovietica, cuyos paises que la conformaban son: Rusia, Transcaucásicas (Armenia, Azerbayán y Georgia), Ucrania y Bielorrusia (disolución en 1991).
+-   Del mismo modo aparece la Unión Sovietica, cuyos paises que la conformaban son: Rusia, Transcaucásicas (Armenia, Azerbayán y Georgia), Ucrania y Bielorrusia (disolución en 1991).
 
-- Por último tenemos Yugoslavia: Bosnia y Herzegovina, Croacia, Eslovenia, Macedonia, Montenegro y Serbia (disolución en 1992).
+-   Por último tenemos Yugoslavia: Bosnia y Herzegovina, Croacia, Eslovenia, Macedonia, Montenegro y Serbia (disolución en 1992).
 
 A la hora de pintar el mapa, todos los paises actuales que formaban parte de algun estado mencionado anteriormente se han coloreado del mismo color que el estado al que pertenecían. Por tanto, las conclusiones que se extraen no son actuales ya que cada país ahora es independiente.
 
-
 ### Conclusión
 
-- Usando el método de componentes principales hemos podido reducir el número de variables a 2, ya que explican aproximadamente el 93.3% de los datos.
+-   Usando el método de componentes principales hemos podido reducir el número de variables a 2, ya que explican aproximadamente el 93.3% de los datos.
 
-- Las variables iniciales que mejor se han podido describir con las dos componentes principales han sido `Agricultura`, `Fábrica` y `Servicios Sociales y Personales`.
+-   Las variables iniciales que mejor se han podido describir con las dos componentes principales han sido `Agricultura`, `Fábrica` y `Servicios Sociales y Personales`.
 
-- Hemos podido establecer 3 grupos de paises con comportamientos semejantes en función de si su fuerza de trabajo se distribuía más en `Agricultura` (Grupo 1), `Fábrica` (Grupo 2) y `Servicios Sociales y Personales` (Grupo 3).
-
+-   Hemos podido establecer 3 grupos de paises con comportamientos semejantes en función de si su fuerza de trabajo se distribuía más en `Agricultura` (Grupo 1), `Fábrica` (Grupo 2) y `Servicios Sociales y Personales` (Grupo 3).
